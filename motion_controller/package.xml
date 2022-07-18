@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>motion_controller</name>
+  <version>0.0.0</version>
+  <description>The motion_controller package</description>
+  <maintainer email="kirill.pogartsev@ya.ru">Kirill Pogartsev</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>takeoff_common</build_depend>
+  <build_depend>rospy</build_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>takeoff_common</exec_depend>
+
+  <export>
+  </export>
+</package>

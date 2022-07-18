@@ -1,0 +1,10 @@
+# Goal
+std_msgs/Header header
+geometry_msgs/Pose pose
+---
+# Define the result
+bool success
+bool error
+---
+# Define a feedback message
+float32 goal_distance

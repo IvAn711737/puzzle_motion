@@ -1,0 +1,6 @@
+# request field
+float32 height
+bool land
+---
+# response field
+bool success

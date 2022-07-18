@@ -1,0 +1,101 @@
+<launch>
+
+    <!-- Удерживать высоту или нет -->
+    <arg name="enable_althold" default="True"/>
+    <!-- Удерживаемая высота -->
+    <arg name="altitude" default="0.5"/>
+    <!-- Тип автопилота -->
+    <arg name="ap_type" default="1"/>
+
+    <arg name="use_vision_odometry" default="1"/>
+
+    <!--Размер карты -->
+    <arg name="map_size_x" default="100.0"/>
+    <arg name="map_size_y" default="100.0"/>
+    <arg name="map_size_z" default=" 3.0"/>
+
+    <!-- Топик одометрии -->
+    <!-- Визуальная одометрия -->
+    <arg name="odom_topic" value="/mavros/vision_pose/pose" if="$(arg use_vision_odometry)"/>
+    <!-- Для ArduPilot -->
+    <arg name="odom_topic" value="/mavros/local_position/odom" if="$(eval arg('ap_type') and not arg('use_vision_odometry'))" />
+    <!-- Для PX4 -->
+    <arg name="odom_topic" value="/mavros/odometry/in" if="$(eval not arg('ap_type') and not arg('use_vision_odometry'))" />
+
+
+    <!-- Топик облака точек -->
+    <arg name="cloud_topic" default="/rtabmap/cloud_map"/>
+    <!-- Топик цели -->
+    <arg name="goal_topic" default="/fast_planner/goal"/>
+
+    <!-- Параметры алгоритма -->
+    <include file="$(find plan_manage)/launch/kino_algorithm.xml">
+        <arg name="output" value="log"/>
+
+        <arg name="map_size_x_" value="$(arg map_size_x)"/>
+        <arg name="map_size_y_" value="$(arg map_size_y)"/>
+        <arg name="map_size_z_" value="$(arg map_size_z)"/>
+        <arg name="odometry_topic" value="$(arg odom_topic)"/>
+
+        <!-- Эти топики пустые, когда используется облако точек -->
+        <arg name="camera_pose_topic" value="/"/>
+        <arg name="depth_topic" value="/"/>
+        <!-- Топик с облаком точек -->
+        <arg name="cloud_topic" value="$(arg cloud_topic)"/>
+
+        <!-- Внутренние параметры камеры -->
+        <arg name="cx" value="640.0"/>
+        <arg name="cy" value="360.0"/>
+        <arg name="fx" value="1171.5120849609375"/>
+        <arg name="fy" value="1171.5120849609375"/>
+
+        <!-- Максимальные скорость и ускорение дрона -->
+        <arg name="max_vel" value="1.0" />
+        <arg name="max_acc" value="0.5" />
+
+        <!-- 1: use 2D Nav Goal to select goal  -->
+        <!-- 2: use global waypoints below  -->
+        <arg name="flight_type" value="1" />
+
+        <!-- global waypoints -->
+        <!-- If flight_type is set to 2, the drone will travel these waypoints one by one -->
+        <arg name="point_num" value="2" />
+
+        <arg name="point0_x" value="19.0" />
+        <arg name="point0_y" value="0.0" />
+        <arg name="point0_z" value="1.0" />
+
+        <!-- set more waypoints if you need -->
+        <arg name="point1_x" value="-19.0" />
+        <arg name="point1_y" value="0.0" />
+        <arg name="point1_z" value="1.0" />
+
+        <arg name="point2_x" value="0.0" />
+        <arg name="point2_y" value="19.0" />
+        <arg name="point2_z" value="1.0" />
+
+    </include>
+
+    <!-- Сервер траекторий -->
+    <node pkg="plan_manage" name="traj_server" type="traj_server" output="log">
+        <remap from="/position_cmd" to="planning/pos_cmd"/>
+        <remap from="/odom_world" to="$(arg odom_topic)"/>
+        <param name="traj_server/time_forward" value="1.5" type="double"/>
+    </node>
+
+    <!-- Генератор точек маршрута -->
+    <node pkg="waypoint_generator" name="waypoint_generator" type="waypoint_generator" output="log">
+        <remap from="~odom" to="$(arg odom_topic)"/>
+        <remap from="~goal" to="$(arg goal_topic)"/>
+        <remap from="~traj_start_trigger" to="/traj_start_trigger" />
+        <param name="waypoint_type" value="manual-lonely-waypoint"/>
+    </node>
+
+    <!-- ActionServer для fast-planner -->
+    <node pkg="fast_planner_server" type="fast_planner_server_node.py" name="fast_planner_server_node" output="log">
+        <param name="enable_althold" value="$(arg enable_althold)"/>
+        <param name="altitude" value="$(arg altitude)"/>
+        <param name="ap_type" value="$(arg ap_type)"/>
+    </node>
+
+</launch>

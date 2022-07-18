@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="ap_type" default="0" />
+    <arg name="use_vision_odometry" default="false" />
+
+    <node pkg="motion_controller" type="run_node.py" name="motion_controller" output="screen">
+        <param name="ap_type" type="int" value="$(arg ap_type)" />
+        <param name="use_vision_odometry" type="bool" value="$(arg use_vision_odometry)" />
+    </node>
+</launch>

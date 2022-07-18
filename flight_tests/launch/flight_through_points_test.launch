@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- Тип автопилота -->
+    <!-- 0 - PX4 -->
+    <!-- 1 - ArduPilot -->
+    <arg name="ap_type" default="0" />
+    <!-- Высота взлета над землей в метрах -->
+    <arg name="altitude" default="1.5" />
+    <!-- Использовать визуальную одометрию или нет -->
+    <arg name="use_vision_odometry" default="0" />
+
+    <node name="$(anon flight_through_points_test)" pkg="flight_tests" type="flight_through_points_test.py" output="screen">
+        <param name="altitude" value="$(arg altitude)" />
+        <param name="autopilot_type" value="$(arg ap_type)" type="bool"/>
+        <param name="use_vision_odometry" value="$(arg use_vision_odometry)" type="bool"/>
+        <param name="tolerance" value="0.1"/>
+        <param name="num_points" value="5"/>
+        <rosparam subst_value="true">
+            point0_x: 0
+            point0_y: 0
+            point1_x: 1
+            point1_y: 0
+            point2_x: -1
+            point2_y: 1
+            point3_x: -1
+            point3_y: -1
+            point4_x: 0
+            point4_y: 0
+        </rosparam>
+
+    </node>
+</launch>
